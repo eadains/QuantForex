@@ -38,16 +38,20 @@ class DataStream(PriceHandler):
         to be seperated by URL-encoded commas.
         """
 
+        # Reformating pairs list to be URL compatible
         encoded_pairs = ["%s_%s" % (p[:3], p[3:]) for p in self.pairs]
         try:
             session = requests.Session()
+            # Setting URL to stream from
             if self.api_source == "practice":
                 url = "https://stream-fxpractice.oanda.com/v1/prices"
             elif self.api_source == "live":
                 url = "https://stream-fxtrade.oanda.com/v1/prices"
+            # Setting relevant GET headers and setting parameters to append on the URL
             headers = {'Authorization': 'Bearer ' + self.access_token}
             params = {'instruments': ','.join(encoded_pairs), 'accountId': self.account_id}
             response = session.get(url, headers=headers, params=params, stream=True)
+            # Running GET request
             return response
         except Exception as excep:
             session.close()
@@ -67,10 +71,12 @@ class DataStream(PriceHandler):
         for line in response.iter_lines(1):
             if line:
                 try:
+                    # Decoding and loading into JSON
                     decode_line = line.decode('utf-8')
                     data = json.loads(decode_line)
                 except Exception as excep:
                     print "Exception when trying to decode response: " + str(excep)
+
                 if ("instrument" in data) or ("tick" in data):
                     print data
                     getcontext().rounding = ROUND_HALF_DOWN
@@ -87,7 +93,7 @@ class DataStream(PriceHandler):
                     self.prices[instrument]["bid"] = bid
                     self.prices[instrument]["ask"] = ask
                     self.prices[instrument]["time"] = time
-                    # Gettings inverted currency pairs
+                    # Getting inverted currency pairs and setting their prices in the dictionary
                     inv_pair, inv_bid, inv_ask = self.invert_price(instrument, bid, ask)
                     self.prices[inv_pair]["bid"] = inv_bid
                     self.prices[inv_pair]["ask"] = inv_ask
@@ -102,9 +108,21 @@ class HistoricCSVPriceHandler(PriceHandler):
     """
     Imports price data from CSV files and puts tick events
     onto the queue.
+
+    Assumes that the files are name pair_yearmonthday
+    Ex: "GBPUSD_20140101.csv"
     """
 
     def __init__(self, pairs, events_queue, csv_dir):
 
         """
-        pairs = pairs 
+        pairs = list of pairs to get CSV files for
+        events_queue = Queue() object to put tick events on
+        csv_dir = directory to look for CSV files in
+        """
+
+        self.pairs = pairs
+        self.events_queue = events_queue
+        self.csv_dir = csv_dir
+        self.prices = self.setup_prices_dict()
+        self.pair_frames = {}
