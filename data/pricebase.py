@@ -1,3 +1,4 @@
+from decimal import Decimal, getcontext, ROUND_HALF_DOWN
 
 
 class PriceHandler(object):
@@ -8,7 +9,7 @@ class PriceHandler(object):
     to the events queue.
     """
 
-    def _setup_prices_dict(self):
+    def setup_prices_dict(self):
 
         """
         Sets up a dictionary to store price information.
@@ -27,3 +28,21 @@ class PriceHandler(object):
 
         prices_dict.update(inv_prices_dict)
         return prices_dict
+
+    def invert_price(self, pair, bid, ask):
+
+        """
+        Inverts the given currency pair.
+        Ex: "GBPUSD" and its associated bid/ask will be turned info
+            "USDGBP" with proper bid/ask
+        """
+
+        getcontext().rounding = ROUND_HALF_DOWN
+        inv_pair = "%s%s" % (pair[3:], pair[:3])
+        inv_bid = (Decimal("1.0")/bid).quantize(
+            Decimal("0.00001")
+        )
+        inv_ask = (Decimal("1.0")/ask).quantize(
+            Decimal("0.00001")
+        )
+        return inv_pair, inv_bid, inv_ask
