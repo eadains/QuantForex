@@ -1,4 +1,5 @@
-import Decimal, ROUND_HALF_DOWN
+import Decimal
+import ROUND_HALF_DOWN
 
 
 class Position(object):
@@ -142,4 +143,34 @@ class Position(object):
 
         """
         Function to removed units from the position
-        Updates
+        Returns profit/loss and calls update_position()
+        """
+
+        reciprocal_price = self.data_stream.prices[self.reciprocal_qoute]
+        remove_units = Decimal(str(units))
+        if self.side == "long":
+            close_price = reciprocal_price["ask"]
+        elif self.side == "short":
+            close_price = reciprocal_price["bid"]
+        self.units -= remove_units
+        self.update_position()
+        # Updating Profit/Loss
+        pnl = self.calculate_pips() * close_price * remove_units
+        return pnl.quantize(Decimal("0.01"), ROUND_HALF_DOWN)
+
+    def close_position(self):
+
+        """
+        Closes position
+        Return Profit/loss
+        """
+
+        reciprocal_price = self.data_stream.prices[self.reciprocal_qoute]
+        if self.side == "long":
+            close_price = reciprocal_price["ask"]
+        elif self.side == "short":
+            close_price = reciprocal_price["bid"]
+        self.update_position()
+        pnl = self.calculate_pips() * close_price * self.units
+        self.units = 0
+        return pnl.quantize(Decimal("0.01"), ROUND_HALF_DOWN)
