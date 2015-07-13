@@ -13,7 +13,7 @@ class Portfolio(object):
     def __init__(
         self, data_stream, events_queue, home_currency="USD",
         leverage=20, equity=Decimal("100000.0"), backtest=None
-            ):
+        ):
 
         """
         data_stream = Streaming object. Object must be subclassed from PriceHandler
