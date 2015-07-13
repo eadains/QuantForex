@@ -95,3 +95,16 @@ class Portfolio(object):
             self.balance += pnl
             del[self.positions[currency_pair]]
             return True
+
+    def update_portfolio(self, tick_event):
+
+        """
+        Updates portfolio, ensuring up-to-date profit/loss
+        Tick Event: An event of the tick class,
+            supplied by the events queue.
+        """
+
+        currency_pair = tick_event.instrument
+        if currency_pair in self.positions:
+            position = self.positions[currency_pair]
+            position.update_position()
