@@ -13,7 +13,7 @@ class RiskHandler(object):
     """
 
     def __init__(
-        self, portfolio
+        self, portfolio, risk_scheme
             ):  # TODO: Potentially add parameters related to risk management
 
         """
@@ -33,4 +33,16 @@ class RiskHandler(object):
         # UNTESTED:::
         units_dict = {}
         for key, value in self.portfolio.positions.iteritems():
-            units_dict.update({key: value.units})
+            self.units_dict.update({key: value.units})
+        return units_dict
+
+    def size_position(self, signal_event):
+
+        """
+        Calls get_positions to determine position size,
+        given the side and currency pair by the signal
+        event.
+        Returns an order event.
+        """
+
+        positions = self.get_positions()
