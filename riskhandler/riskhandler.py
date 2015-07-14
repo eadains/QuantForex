@@ -1,28 +1,17 @@
-# General Plan:
-# Needs to accept a signal event and return an order event.
-# Needs to get current positions from portfolio and
-# size order given that information
+import abc
 
 
-class RiskHandler(object):
+class RiskHandlerBase(object):
 
     """
-    Class to receive signal events.
-    Uses current position information, as given
-    by the Portfolio given to size orders.
+    Abstract base Class to be subclassed by risk handling
+    classes. Provides basic functionality and abstract
+    size_position function.
     """
 
-    def __init__(
-        self, portfolio, risk_scheme
-            ):  # TODO: Potentially add parameters related to risk management
+    __metaclass__ = abc.ABCMeta
 
-        """
-        Add doc
-        """
-
-        self.portfolio = portfolio
-
-    def get_positions(self):
+    def get_positions(self, portfolio):
 
         """
         Gets currently open positions from
@@ -32,10 +21,11 @@ class RiskHandler(object):
         """
         # UNTESTED:::
         units_dict = {}
-        for key, value in self.portfolio.positions.iteritems():
-            self.units_dict.update({key: value.units})
+        for key, value in portfolio.positions.iteritems():
+            units_dict.update({key: value.units})
         return units_dict
 
+    @abc.abstractmethod
     def size_position(self, signal_event):
 
         """
@@ -45,4 +35,4 @@ class RiskHandler(object):
         Returns an order event.
         """
 
-        positions = self.get_positions()
+        return
