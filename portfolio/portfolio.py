@@ -13,7 +13,7 @@ class Portfolio(object):
     def __init__(
         self, data_stream, events_queue, home_currency="USD",
         leverage=20, equity=Decimal("100000.0"), backtest=None
-        ):
+            ):
 
         """
         data_stream = Streaming object. Object must be subclassed from PriceHandler
@@ -71,7 +71,8 @@ class Portfolio(object):
         Removes units from an existing Position,
         denoted by currency_pair
         """
-
+        # TODO: Allow removing more units than exists and convert
+        # position to short.
         if currency_pair not in self.positions:
             return False
         else:
