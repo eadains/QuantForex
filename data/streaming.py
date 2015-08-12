@@ -3,6 +3,8 @@ import requests
 import json
 from decimal import Decimal, getcontext, ROUND_HALF_DOWN
 from event.event import TickEvent
+import sqlalchemy as sql
+import pandas as pd
 
 
 class DataStream(PriceHandler):
@@ -103,7 +105,7 @@ class DataStream(PriceHandler):
                     self.events_queue.put(tick_event)
 
 
-class HistoricCSVPriceHandler(PriceHandler):
+class HistoricPriceHandler(PriceHandler):
 
     """
     Imports price data from CSV files and puts tick events
@@ -113,16 +115,35 @@ class HistoricCSVPriceHandler(PriceHandler):
     Ex: "GBPUSD_20140101.csv"
     """
 
-    def __init__(self, pairs, events_queue, csv_dir):
+    def __init__(self, pairs, events_queue, date_range):
 
         """
         pairs = list of pairs to get CSV files for
         events_queue = Queue() object to put tick events on
-        csv_dir = directory to look for CSV files in
+        date_range = tuple containing the two dates to fetch data between
         """
 
         self.pairs = pairs
         self.events_queue = events_queue
-        self.csv_dir = csv_dir
+        self.start_date = date_range[0]
+        self.end_date = date_range[1]
         self.prices = self.setup_prices_dict()
         self.pair_frames = {}
+
+    def get_data(self):
+
+        """
+        Fetches data for all pairs, using start_date
+        and end_date.
+        Concatenates data for each pair into one
+        data frame.
+        """
+
+        engine = sql.create_engine("mysql+mysqldb://root:Slimjoewilly12@localhost:3306/price_data")
+        pair_frames = {}
+        for p in self.pairs:
+            select = sql.select(['id']).where("ticker = '%s'" % p).select_from('symbols')
+            ticker_id = engine.execute(select).fetchone()[0]
+            query = "SELECT date_time, bid, ask FROM ticks WHERE (symbol_id = '%s') AND (DATE(date_time) BETWEEN '%s' AND '%s')" % (str(ticker_id), self.start_date, self.end_date)
+            pair_frames[p] = pd.read_sql_query(query, con=engine, index_col="date_time")
+        return pd.concat(pair_frames.values()).sort()
