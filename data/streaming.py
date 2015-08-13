@@ -129,6 +129,7 @@ class HistoricPriceHandler(PriceHandler):
         self.end_date = date_range[1]
         self.prices = self.setup_prices_dict()
         self.pair_frames = {}
+        self.pair_data = self.get_data()
 
     def get_data(self):
 
@@ -144,6 +145,38 @@ class HistoricPriceHandler(PriceHandler):
         for p in self.pairs:
             select = sql.select(['id']).where("ticker = '%s'" % p).select_from('symbols')
             ticker_id = engine.execute(select).fetchone()[0]
-            query = "SELECT date_time, bid, ask FROM ticks WHERE (symbol_id = '%s') AND (DATE(date_time) BETWEEN '%s' AND '%s')" % (str(ticker_id), self.start_date, self.end_date)
+            query = ("SELECT symbols.ticker, ticks.date_time, ticks.bid, ticks.ask FROM ticks INNER JOIN symbols on ticks.symbol_id = symbols.id "
+                     "WHERE (symbol_id = '%s') AND (DATE(date_time) BETWEEN '%s' AND '%s')" % (str(ticker_id), self.start_date, self.end_date))
             pair_frames[p] = pd.read_sql_query(query, con=engine, index_col="date_time")
         return pd.concat(pair_frames.values()).sort()
+
+    def stream_tick(self):
+
+        """
+        Puts next piece of price information onto
+        the event queue.
+        """
+
+        index, row = next(self.pair_data.iterrows())
+        pair = row["ticker"]
+        bid = Decimal(str(row["Bid"])).quantize(
+            Decimal("0.00001")
+        )
+        ask = Decimal(str(row["Ask"])).quantize(
+            Decimal("0.00001")
+        )
+
+        # Create decimalised prices for traded pair
+        self.prices[pair]["bid"] = bid
+        self.prices[pair]["ask"] = ask
+        self.prices[pair]["time"] = index
+
+        # Create decimalised prices for inverted pair
+        inv_pair, inv_bid, inv_ask = self.invert_prices(pair, bid, ask)
+        self.prices[inv_pair]["bid"] = inv_bid
+        self.prices[inv_pair]["ask"] = inv_ask
+        self.prices[inv_pair]["time"] = index
+
+        # Create the tick event for the queue
+        tev = TickEvent(pair, index, bid, ask)
+        self.events_queue.put(tev)
