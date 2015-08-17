@@ -15,13 +15,13 @@ class Backtest(object):
     ):
 
         self.pairs = pairs
-        self.queue = queue.Queue()
+        self.events = queue.Queue()
         self.dates = dates
-        self.prices = price_handler(self.pairs, self.queue, self.dates)
-        self.strategy = strategy(self.queue)
-        self.portfolio = portfolio(self.prices, self.queue, equity=equity)
-        self.risk = risk(self.portfolio, self.queue)
-        self.exection = execution(self.portfolio)
+        self.prices = price_handler(self.pairs, self.events, self.dates)
+        self.strategy = strategy(self.events)
+        self.portfolio = portfolio(self.prices, self.events, equity=equity)
+        self.risk = risk(self.portfolio, self.events)
+        self.execution = execution(self.portfolio)
 
     def _run_backtest(self):
 
@@ -29,7 +29,7 @@ class Backtest(object):
         print "Running backtest now..."
         while self.prices.continue_backtest == True:
             try:
-                event = self.queue.get(False)
+                event = self.events.get(False)
             except queue.Empty:
                 self.prices.stream_tick()
             else:
@@ -39,6 +39,7 @@ class Backtest(object):
                     equity_data = equity_data.append(
                         {'DateTime': event.time, 'Equity': self.portfolio.equity},
                         ignore_index=True)
+                    print event.time
                 elif event.type == 'SIGNAL':
                     self.risk.size_position(event)
                 elif event.type == 'ORDER':
@@ -61,5 +62,5 @@ class Backtest(object):
         """
 
         self._run_backtest()
-        self._output_performance()
+        # self._output_performance()
         print "Backtest complete"

@@ -1,5 +1,5 @@
-import Decimal
-from portfolio.position import Position
+from decimal import *
+from position import Position
 
 
 class Portfolio(object):

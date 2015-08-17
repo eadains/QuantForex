@@ -1,4 +1,4 @@
-from execution.executionbase import ExecutionHandler
+from executionbase import ExecutionHandler
 
 
 class BacktestHandler(ExecutionHandler):

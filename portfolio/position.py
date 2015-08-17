@@ -1,5 +1,4 @@
-import Decimal
-import ROUND_HALF_DOWN
+from decimal import *
 
 
 class Position(object):
@@ -30,7 +29,7 @@ class Position(object):
         self.data_stream = data_stream
         self.setup_currencies()
         self.profit_base = self.calculate_profit()
-        self.profit_percentage = self.profit_percentage()
+        self.profit_percentage = self.calc_profit_percent()
 
     def setup_currencies(self):
 
@@ -96,7 +95,7 @@ class Position(object):
         )
         return profit
 
-    def profit_percentage(self):
+    def calc_profit_percent(self):
 
         """
         Calculates percentage profit on the position
@@ -120,7 +119,7 @@ class Position(object):
         elif self.side == "short":
             self.cur_price = self.pair_price["ask"]
         self.profit_base = self.calculate_profit()
-        self.profit_percentage = self.profit_percentage()
+        self.profit_percentage = self.calc_profit_percent()
 
     def add_units(self, units):
 

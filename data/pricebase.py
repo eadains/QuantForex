@@ -29,7 +29,7 @@ class PriceHandler(object):
         prices_dict.update(inv_prices_dict)
         return prices_dict
 
-    def invert_price(self, pair, bid, ask):
+    def invert_prices(self, pair, bid, ask):
 
         """
         Inverts the given currency pair.

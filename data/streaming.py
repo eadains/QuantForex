@@ -130,6 +130,7 @@ class HistoricPriceHandler(PriceHandler):
         self.prices = self.setup_prices_dict()
         self.pair_frames = {}
         self.pair_data = self.get_data()
+        self.continue_backtest = True
 
     def get_data(self):
 
@@ -148,7 +149,7 @@ class HistoricPriceHandler(PriceHandler):
             query = ("SELECT symbols.ticker, ticks.date_time, ticks.bid, ticks.ask FROM ticks INNER JOIN symbols on ticks.symbol_id = symbols.id "
                      "WHERE (symbol_id = '%s') AND (DATE(date_time) BETWEEN '%s' AND '%s')" % (str(ticker_id), self.start_date, self.end_date))
             pair_frames[p] = pd.read_sql_query(query, con=engine, index_col="date_time")
-        return pd.concat(pair_frames.values()).sort()
+        return pd.concat(pair_frames.values()).sort().iterrows()
 
     def stream_tick(self):
 
@@ -157,16 +158,16 @@ class HistoricPriceHandler(PriceHandler):
         the event queue.
         """
 
-        self.continue_backtest = True
         try:
-            index, row = next(self.pair_data.iterrows())
+            index, row = next(self.pair_data)
         except StopIteration:
             self.continue_backtest = False
+            return
         pair = row["ticker"]
-        bid = Decimal(str(row["Bid"])).quantize(
+        bid = Decimal(str(row["bid"])).quantize(
             Decimal("0.00001")
         )
-        ask = Decimal(str(row["Ask"])).quantize(
+        ask = Decimal(str(row["ask"])).quantize(
             Decimal("0.00001")
         )
 
@@ -182,5 +183,5 @@ class HistoricPriceHandler(PriceHandler):
         self.prices[inv_pair]["time"] = index
 
         # Create the tick event for the queue
-        tev = TickEvent(pair, index, bid, ask)
+        tev = TickEvent(pair, bid, ask, index)
         self.events_queue.put(tev)
