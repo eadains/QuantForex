@@ -78,7 +78,7 @@ class Portfolio(object):
         else:
             position = self.positions[currency_pair]
             pnl = position.remove_units(units)
-            self.balance += pnl
+            self.equity += pnl
             return True
 
     def close_position(self, currency_pair):
@@ -93,7 +93,7 @@ class Portfolio(object):
         else:
             position = self.positions[currency_pair]
             pnl = position.close_position()
-            self.balance += pnl
+            self.equity += pnl
             del[self.positions[currency_pair]]
             return True
 

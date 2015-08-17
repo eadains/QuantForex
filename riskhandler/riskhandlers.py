@@ -12,7 +12,7 @@ class DefaultTestHandler(RiskHandlerBase):
 
     def __init__(self, portfolio, queue):
 
-        self.equity = portfolio.equity
+        self.portfolio = portfolio
         self.queue = queue
 
     def size_position(self, signal_event):
@@ -23,7 +23,7 @@ class DefaultTestHandler(RiskHandlerBase):
         proper currency pair and units.
         """
         currency_pair = signal_event.instrument
-        units = self.equity * Decimal("0.02")
+        units = self.portfolio.equity * Decimal("0.02")
         order_type = signal_event.order_type
         side = signal_event.side
         order = OrderEvent(currency_pair, units, order_type, side)

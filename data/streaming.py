@@ -157,7 +157,11 @@ class HistoricPriceHandler(PriceHandler):
         the event queue.
         """
 
-        index, row = next(self.pair_data.iterrows())
+        self.continue_backtest = True
+        try:
+            index, row = next(self.pair_data.iterrows())
+        except StopIteration:
+            self.continue_backtest = False
         pair = row["ticker"]
         bid = Decimal(str(row["Bid"])).quantize(
             Decimal("0.00001")
