@@ -1,4 +1,6 @@
 import Queue as queue
+import pandas as pd
+from settings import OUTPUT_RESULTS_DIR
 
 
 class Backtest(object):
@@ -23,6 +25,7 @@ class Backtest(object):
 
     def _run_backtest(self):
 
+        equity_data = pd.DataFrame(columns=['DateTime', 'Equity'])
         print "Running backtest now..."
         while self.prices.continue_backtest == True:
             try:
@@ -33,10 +36,14 @@ class Backtest(object):
                 if event.type == 'TICK':
                     self.strategy.calculate_signals(event)
                     self.portfolio.update_portfolio(event)
+                    equity_data = equity_data.append(
+                        {'DateTime': event.time, 'Equity': self.portfolio.equity},
+                        ignore_index=True)
                 elif event.type == 'SIGNAL':
                     self.risk.size_position(event)
                 elif event.type == 'ORDER':
                     self.execution.execute_order(event)
+        equity_data.to_csv(OUTPUT_RESULTS_DIR)
 
     def _output_performance(self):
 
