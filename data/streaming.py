@@ -31,7 +31,7 @@ class DataStream(PriceHandler):
         self.events_queue = events_queue
         self.prices_dict = self.setup_prices_dict()
 
-    def connect_to_stream(self):
+    def _connect_to_stream(self):
 
         """
         Establishes a connection with Oanda API. URL is changed depending
@@ -66,7 +66,7 @@ class DataStream(PriceHandler):
         and then adds a Tick event to the supplied queue.
         """
 
-        response = self.connect_to_stream()
+        response = self._connect_to_stream()
         if response.status_code != 200:
             print "connect_to_stream did not return expected"
             return
@@ -92,14 +92,14 @@ class DataStream(PriceHandler):
                         Decimal("0.00001")
                     )
                     # Setting prices in dictionary
-                    self.prices[instrument]["bid"] = bid
-                    self.prices[instrument]["ask"] = ask
-                    self.prices[instrument]["time"] = time
+                    self.prices_dict[instrument]["bid"] = bid
+                    self.prices_dict[instrument]["ask"] = ask
+                    self.prices_dict[instrument]["time"] = time
                     # Getting inverted currency pairs and setting their prices in the dictionary
                     inv_pair, inv_bid, inv_ask = self.invert_price(instrument, bid, ask)
-                    self.prices[inv_pair]["bid"] = inv_bid
-                    self.prices[inv_pair]["ask"] = inv_ask
-                    self.prices[inv_pair]["time"] = time
+                    self.prices_dict[inv_pair]["bid"] = inv_bid
+                    self.prices_dict[inv_pair]["ask"] = inv_ask
+                    self.prices_dict[inv_pair]["time"] = time
                     # Putting tick event on queue
                     tick_event = TickEvent(instrument, bid, ask, time)
                     self.events_queue.put(tick_event)

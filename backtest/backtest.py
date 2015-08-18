@@ -1,6 +1,8 @@
 import Queue as queue
 import pandas as pd
 from settings import OUTPUT_RESULTS_DIR
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 class Backtest(object):
@@ -52,7 +54,18 @@ class Backtest(object):
         Outputs performance stats of the backtest
         """
 
-        # Implement after performance stuff is done
+        data = pd.read_csv(OUTPUT_RESULTS_DIR, index_col='DateTime')
+        data = data.drop(data.columns[0], 1)
+        data['Returns'] = data.pct_change()
+        sns.set_palette("deep", desat=.6)
+        sns.set_context(rc={"figure.figsize": (8, 4)})
+        fig = plt.figure()
+        fig.patch.set_facecolor('white')
+        ax1 = fig.add_subplot(311, ylabel='Portfolio value')
+        data["Equity"].plot(ax=ax1, color=sns.color_palette()[0])
+        ax2 = fig.add_subplot(312, ylabel='Period returns')
+        data['Returns'].plot(ax=ax2, color=sns.color_palette()[1])
+        plt.show()
 
     def do_backtest(self):
 
@@ -62,5 +75,5 @@ class Backtest(object):
         """
 
         self._run_backtest()
-        # self._output_performance()
+        self._output_performance()
         print "Backtest complete"

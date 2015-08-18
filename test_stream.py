@@ -1,13 +1,14 @@
-from data.streaming import HistoricPriceHandler
+from data.streaming import DataStream
 import Queue as queue
+from settings import ACCESS_TOKEN, ACCOUNT_ID
 
-event_queue = queue.Queue()
-handler = HistoricPriceHandler(['EURUSD'], event_queue, ('2014-01-01', '2014-01-01'))
+events_queue = queue.Queue()
+handler = DataStream("practice", ACCESS_TOKEN, ACCOUNT_ID, ['EURUSD'], events_queue)
 
-while handler.continue_backtest == True:
+while True:
     try:
-        var = event_queue.get(False).time
+        var = events_queue.get(False).time
     except queue.Empty:
-        handler.stream_tick()
+        pass
     else:
         print var
