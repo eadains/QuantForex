@@ -1,4 +1,5 @@
 from executionbase import ExecutionHandler
+import requests
 
 
 class BacktestHandler(ExecutionHandler):
@@ -55,3 +56,34 @@ class BacktestHandler(ExecutionHandler):
 
             elif side == "short" and position.side == "short":
                 self.portfolio.add_position_units(currency_pair, units)
+
+
+class OandaExecution(ExecutionHandler):
+
+    """
+    Executes order with oandas using
+    provided account ID and access
+    token information.
+    """
+
+    def __init__(self, api_source, access_token, account_id):
+
+        self.access_token = access_token
+        self.account_id = account_id
+        if api_source == "practice":
+            self.api_source = "https://api-fxpractice.oanda.com/v1/accounts/%s/orders" % account_id
+        elif api_source == "live":
+            self.api_source = "https://api-fxtrade.oanda.com/v1/accounts/%s/orders" % account_id
+        self.session = requests.Session()
+        self.session.headers.update({'Authorization': 'Bearer ' + self.access_token})
+
+    def execute_order(self, order_event):
+
+        encoded_pair = "%s_%s" % (order_event.instrument[:3], order_event.instrument[3:])
+        order = {'instrument': encoded_pair, 'units': int(order_event.units),
+                 'side': order_event.side, 'type': order_event.order_type}
+        try:
+            self.session.post(self.api_source, data=order)
+            print "%s order for %d units of %s executed." % (order_event.side, order_event.units, order_event.instrument)
+        except Exception as exception:
+            print "Exception when trying to execute order: " + str(exception)

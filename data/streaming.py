@@ -96,7 +96,7 @@ class DataStream(PriceHandler):
                     self.prices_dict[instrument]["ask"] = ask
                     self.prices_dict[instrument]["time"] = time
                     # Getting inverted currency pairs and setting their prices in the dictionary
-                    inv_pair, inv_bid, inv_ask = self.invert_price(instrument, bid, ask)
+                    inv_pair, inv_bid, inv_ask = self.invert_prices(instrument, bid, ask)
                     self.prices_dict[inv_pair]["bid"] = inv_bid
                     self.prices_dict[inv_pair]["ask"] = inv_ask
                     self.prices_dict[inv_pair]["time"] = time

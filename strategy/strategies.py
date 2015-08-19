@@ -19,11 +19,11 @@ class TestStrategy(StrategyBase):
         time = tick_event.time
         if self.ticks % 5 == 0:
             if self.invested == False:
-                signal = SignalEvent(currency_pair, "market", "long", time)
+                signal = SignalEvent(currency_pair, "market", "buy", time)
                 self.events_queue.put(signal)
                 self.invested = True
             elif self.invested == True:
-                signal = SignalEvent(currency_pair, "market", "short", time)
+                signal = SignalEvent(currency_pair, "market", "sell", time)
                 self.events_queue.put(signal)
                 self.invested = False
         self.ticks += 1
