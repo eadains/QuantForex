@@ -29,7 +29,7 @@ class SignalEvent(Event):
 
     Instrument = instrument to be traded
     Order Type = Market/Limit/stop/etc.
-    Side = Long or Short
+    Side = 'buy' or 'sell'
     time = time event was created
     """
 
@@ -50,7 +50,7 @@ class OrderEvent(Event):
     Instrument = Instrument to be traded
     units = units to be bought or sold
     order type = Market/limit/stop/etc.
-    side = long or short
+    side = 'buy' or 'sell'
     """
 
     def __init__(self, instrument, units, order_type, side):

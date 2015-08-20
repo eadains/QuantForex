@@ -7,6 +7,7 @@ from strategy.strategies import TestStrategy
 import Queue as queue
 from settings import ACCESS_TOKEN, ACCOUNT_ID
 
+
 def trade(execution, portfolio, risk, strategy, events):
 
     while True:
@@ -28,8 +29,8 @@ if __name__ == "__main__":
     events = queue.Queue()
     pairs = ['EURUSD']
     stream = DataStream("practice", ACCESS_TOKEN, ACCOUNT_ID, pairs, events)
-    execution = OandaExecution("practice", ACCESS_TOKEN, ACCOUNT_ID)
-    portfolio = Portfolio(DataStream, events)
+    portfolio = Portfolio(stream, events)
+    execution = OandaExecution("practice", ACCESS_TOKEN, ACCOUNT_ID, portfolio)
     risk = DefaultTestHandler(portfolio, events)
     strategy = TestStrategy(events)
 

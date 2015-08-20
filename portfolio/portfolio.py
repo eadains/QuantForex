@@ -1,4 +1,4 @@
-from decimal import *
+from decimal import Decimal
 from position import Position
 
 
@@ -12,8 +12,8 @@ class Portfolio(object):
 
     def __init__(
         self, data_stream, events_queue, home_currency="USD",
-        leverage=20, equity=Decimal("100000.0"), backtest=None
-            ):
+        leverage=20, equity=Decimal("100000.0")
+    ):
 
         """
         data_stream = Streaming object. Object must be subclassed from PriceHandler
@@ -31,10 +31,7 @@ class Portfolio(object):
         self.home_currency = home_currency
         self.leverage = leverage
         self.equity = equity
-        self.backtest = backtest
         self.positions = {}
-        if self.backtest:
-            self.backtest_file = self.backtest.backtest_file_dir
 
     def add_new_position(self, side, currency_pair, units):
 
@@ -45,10 +42,8 @@ class Portfolio(object):
         units = number of currency units long/short
         """
 
-        position = Position(
-            self.home_currency, side, currency_pair,
-            units, self.data_stream
-        )
+        position = Position(self.home_currency, side,
+                            currency_pair, units, self.data_stream)
         self.positions[currency_pair] = position
 
     def add_position_units(self, currency_pair, units):

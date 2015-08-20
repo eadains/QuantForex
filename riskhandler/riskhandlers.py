@@ -1,6 +1,6 @@
 from riskhandler.riskhandlerbase import RiskHandlerBase
 from event.event import OrderEvent
-from decimal import *
+from decimal import Decimal
 
 
 class DefaultTestHandler(RiskHandlerBase):

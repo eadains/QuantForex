@@ -3,10 +3,18 @@ from sqlalchemy import create_engine
 
 
 def write_data(csv_dir):
+
+    """
+    Writes csv files for TrueFx to database.
+    Very rudimentary.
+    Will be made more dynamic in future.
+    """
+
     dataframe = pd.read_csv(csv_dir, header=None)
     dataframe = dataframe.replace("EUR/USD", value=1)
     dataframe.insert(0, "data_provider_id", value=1)
     dataframe.columns = ["data_provider_id", "symbol_id", "date_time", "bid", "ask"]
+
     def test(row):
         unmodified = row["date_time"]
         modified = unmodified[:4] + '-' + unmodified[4:6] + '-' + unmodified[6:]

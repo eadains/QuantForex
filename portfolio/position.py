@@ -1,4 +1,4 @@
-from decimal import *
+from decimal import Decimal, ROUND_HALF_DOWN
 
 
 class Position(object):
@@ -48,12 +48,12 @@ class Position(object):
         # Creating reciprocal qoute to have position exposure in your home currency
         self.reciprocal_qoute = "%s%s" % (self.qoute_currency, self.base_currency)
         # Fetching currency price of the currency pair
-        self.pair_price = self.data_stream.prices[self.currency_pair]
+        self.pair_price = self.data_stream.prices_dict[self.currency_pair]
         # Settings baseline average cost basis and current price
-        if self.side == "long":
+        if self.side == "buy":
             self.avg_price = Decimal(str(self.pair_price["ask"]))
             self.cur_price = Decimal(str(self.pair_price["bid"]))
-        elif self.side == "short":
+        elif self.side == "sell":
             self.avg_price = Decimal(str(self.pair_price["bid"]))
             self.cur_price = Decimal(str(self.pair_price["ask"]))
 
@@ -65,9 +65,9 @@ class Position(object):
         depending on if the position is long or short
         """
 
-        if self.side == "long":
+        if self.side == "buy":
             multiplier = Decimal("1")
-        elif self.side == "short":
+        elif self.side == "sell":
             multiplier = Decimal("-1")
         # Calculating pips
         pips = (multiplier * (self.cur_price - self.avg_price)).quantize(
@@ -84,11 +84,11 @@ class Position(object):
 
         pips = self.calculate_pips()
         # Getting price information for reciprocal qoute
-        reciprocal_price = self.data_stream.prices[self.reciprocal_qoute]
+        reciprocal_price = self.data_stream.prices_dict[self.reciprocal_qoute]
         # Getting proper bid/ask depending on position side
-        if self.side == "long":
+        if self.side == "buy":
             reciprocal_close = reciprocal_price["ask"]
-        elif self.side == "short":
+        elif self.side == "sell":
             reciprocal_close = reciprocal_price["bid"]
         profit = (pips * reciprocal_close * self.units).quantize(
             Decimal("0.00001"), ROUND_HALF_DOWN
@@ -114,9 +114,9 @@ class Position(object):
         and current pair price
         """
 
-        if self.side == "long":
+        if self.side == "buy":
             self.cur_price = self.pair_price["bid"]
-        elif self.side == "short":
+        elif self.side == "sell":
             self.cur_price = self.pair_price["ask"]
         self.profit_base = self.calculate_profit()
         self.profit_percentage = self.calc_profit_percent()
@@ -128,9 +128,9 @@ class Position(object):
         Updates average cost basis and number of units.
         """
 
-        if self.side == "long":
+        if self.side == "buy":
             add_price = self.pair_price["ask"]
-        elif self.side == "short":
+        elif self.side == "sell":
             add_price = self.pair_price["bid"]
         new_total_units = self.units + units
         new_total_cost = (self.avg_price * self.units) + (add_price * units)
@@ -145,11 +145,11 @@ class Position(object):
         Returns profit/loss and calls update_position()
         """
 
-        reciprocal_price = self.data_stream.prices[self.reciprocal_qoute]
+        reciprocal_price = self.data_stream.prices_dict[self.reciprocal_qoute]
         remove_units = Decimal(str(units))
-        if self.side == "long":
+        if self.side == "buy":
             close_price = reciprocal_price["ask"]
-        elif self.side == "short":
+        elif self.side == "sell":
             close_price = reciprocal_price["bid"]
         self.units -= remove_units
         self.update_position()
@@ -164,10 +164,10 @@ class Position(object):
         Return Profit/loss
         """
 
-        reciprocal_price = self.data_stream.prices[self.reciprocal_qoute]
-        if self.side == "long":
+        reciprocal_price = self.data_stream.prices_dict[self.reciprocal_qoute]
+        if self.side == "buy":
             close_price = reciprocal_price["ask"]
-        elif self.side == "short":
+        elif self.side == "sell":
             close_price = reciprocal_price["bid"]
         self.update_position()
         pnl = self.calculate_pips() * close_price * self.units

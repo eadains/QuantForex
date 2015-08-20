@@ -108,17 +108,13 @@ class DataStream(PriceHandler):
 class HistoricPriceHandler(PriceHandler):
 
     """
-    Imports price data from CSV files and puts tick events
-    onto the queue.
-
-    Assumes that the files are name pair_yearmonthday
-    Ex: "GBPUSD_20140101.csv"
+    Queries database for historical tick information
     """
 
     def __init__(self, pairs, events_queue, date_range):
 
         """
-        pairs = list of pairs to get CSV files for
+        pairs = list of pairs to get data for
         events_queue = Queue() object to put tick events on
         date_range = tuple containing the two dates to fetch data between
         """
