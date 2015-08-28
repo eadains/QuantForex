@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 import os
 
 
-def write_data(csv_dir, currency_pair):
+def write_data(csv_dir, currency_pair, symbol_id):
 
     """
     Writes csv files for TrueFx to database.
@@ -14,7 +14,7 @@ def write_data(csv_dir, currency_pair):
 
         filedir = csv_dir + "/" + file
         dataframe = pd.read_csv(filedir, header=None)
-        dataframe = dataframe.replace(currency_pair, value=1)
+        dataframe = dataframe.replace(currency_pair, value=symbol_id)
         dataframe.insert(0, "data_provider_id", value=1)
         dataframe.columns = ["data_provider_id", "symbol_id", "date_time", "bid", "ask"]
 
