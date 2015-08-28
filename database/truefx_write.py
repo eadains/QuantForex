@@ -12,7 +12,7 @@ def write_data(csv_dir, currency_pair):
     """
     for file in os.listdir(csv_dir):
 
-        filedir = csv_dir + file
+        filedir = csv_dir + "/" + file
         dataframe = pd.read_csv(filedir, header=None)
         dataframe = dataframe.replace(currency_pair, value=1)
         dataframe.insert(0, "data_provider_id", value=1)
